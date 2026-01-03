@@ -1,9 +1,9 @@
+
 import React, { useState } from "react";
 import "./Login.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// رابط الـ backend
 const API_URL = "https://v-nement-scientifique.onrender.com/api/auth";
 
 export default function LoginPage() {
@@ -22,55 +22,75 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // إرسال طلب تسجيل الدخول
       const response = await axios.post(`${API_URL}/login`, {
         email: email.trim(),
         password,
       });
 
-      // طباعة الرد الكامل في الكونسول للتشخيص (مهم جدًا!)
       console.log("✅ رد السيرفر كامل بعد الـ login:", response.data);
 
-      // محاولة استخراج الـ token بأي اسم محتمل
-      let token =
-        response.data.token ||
-        response.data.accessToken ||
-        response.data.jwt ||
-        response.data.access_token ||
-        response.data.authToken ||
-        response.data.sessionToken ||
-        response.data.data?.token ||
-        response.data.user?.token ||
-        response.data.result?.token;
+      // السطر الجديد اللي هيحل المشكلة نهائيًا
+      console.log("🔍 هيكل الـ response كامل (JSON مرتب):", JSON.stringify(response.data, null, 2));
+
+      // استخراج الـ token
+      const token =
+        response.data.token  ||
+        response.data.accessToken  || 
+        response.data.jwt  ||
+        response.data.access_token || 
+        response.data.authToken  ||
+        response.data.sessionToken  ||
+        response.data.data?.token  ||
+        response.data.user?.token || 
+        response.data.result?.token  ||
+        response.data.profile?.token;
 
       if (!token) {
-        // إذا ما لقيناش الـ token، نعطي رسالة واضحة
-        throw new Error(
-          "لم يتم العثور على رمز الدخول (token) في رد السيرفر.\n" +
-            "تحقق من console.log أعلاه لرؤية شكل الـ response الدقيق."
-        );
+        throw new Error("لم يتم العثور على رمز الدخول (token) في الرد.");
       }
+// استخراج الـ role بدقة 100% حسب الـ response اللي عندك
+let role = "participant";
 
-      // حفظ الـ token في localStorage
+if (response.data.role) {
+  role = response.data.role;
+} else if (response.data.user?.role) {
+  role = response.data.user.role;
+} else if (response.data.data?.role) {
+  role = response.data.data.role;
+} else if (response.data.data?.user?.role) {
+  role = response.data.data.user.role;  // ← هذا السطر الجديد اللي هيحل كل المشكلة
+} else if (response.data.result?.role) {
+  role = response.data.result.role;
+} else if (response.data.profile?.role) {
+  role = response.data.profile.role;
+}
+
+console.log("✅ الـ role المستخرج:", role); // هيظهر "event_organizer" دلوقتي
       localStorage.setItem("token", token);
+localStorage.setItem("userRole", role);
 
-      alert("Connexion réussie ! مرحبا بك 👋");
-      window.location.href = "/participant"; // redirect إلى داشبورد المشارك
+const roleMap = {
+  super_admin: "/admin",
+  event_organizer: "/organizer",
+  communicant: "/communicant",
+  scientific_committee: "/committee",
+  guest_speaker: "/guest",
+  workshop_animator: "/workshop",
+  participant: "/participant",
+};
+
+const redirectPath = roleMap[role] || "/participant";
+
+alert(`Connexion réussie ! Bienvenue, ${role.replace("_", " ")} 👋`);
+
+window.location.href = redirectPath;
 
     } catch (err) {
       console.error("❌ خطأ في تسجيل الدخول:", err);
-
       let errorMsg = "Email ou mot de passe incorrect";
-
-      // إذا السيرفر أرجع رسالة خطأ واضحة
-      if (err.response?.data?.error) {
-        errorMsg = err.response.data.error;
-      } else if (err.response?.data?.message) {
-        errorMsg = err.response.data.message;
-      } else if (err.message) {
-        errorMsg = err.message;
-      }
-
+      if (err.response?.data?.error) errorMsg = err.response.data.error;
+      else if (err.response?.data?.message) errorMsg = err.response.data.message;
+      else if (err.message) errorMsg = err.message;
       alert("خطأ في تسجيل الدخول:\n" + errorMsg);
     } finally {
       setLoading(false);
@@ -109,7 +129,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="options">
+<div className="options">
             <label>
               <input type="checkbox" disabled={loading} /> Se souvenir de moi
             </label>

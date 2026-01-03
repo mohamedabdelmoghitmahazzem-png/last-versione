@@ -1,7 +1,7 @@
+
 import React, { useState } from "react";
 import "./sign up.css";
 
-// رابط الـ backend
 const API_URL = "https://v-nement-scientifique.onrender.com/api/auth/register";
 
 export default function Signup() {
@@ -10,20 +10,24 @@ export default function Signup() {
     lastName: "",
     email: "",
     password: "",
-    role: "participant",
+    role: "participant", // default آمن
     institution: "",
     title: "",
     phone: "",
   });
 
-  // قائمة الـ roles موحدة ومصححة
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // القائمة الصحيحة تمامًا حسب الـ backend enum
   const roles = [
-    { value: "participant", label: "Participant" },
-    { value: "author", label: "Auteur" }, // مصحح من auther
-    { value: "organizer", label: "Organisateur" },
+    { value: "participant", label: "Participant " },
+    { value: "communicant", label: "Communicant " },
+    { value: "event_organizer", label: "Organisateur de l'événement" },
     { value: "scientific_committee", label: "Membre du Comité Scientifique" },
-    { value: "guest", label: "Invité" },
+    { value: "guest_speaker", label: "Conférencier Invité" },
     { value: "workshop_animator", label: "Animateur Workshop" },
+    // 'super_admin' مش هنضيفه هنا للأمان (يُضاف يدويًا في الـ DB)
   ];
 
   const handleChange = (e) =>
@@ -38,9 +42,9 @@ export default function Signup() {
       email: form.email.trim(),
       password: form.password,
       role: form.role,
-      institution: form.institution.trim() || "Non spécifié",
-      title: form.title.trim() || "Non spécifié",
-      phone: form.phone.trim() || "Non spécifié",
+      institution: form.institution.trim()  ||  "Non spécifié",
+      title: form.title.trim()   ||"Non spécifié",
+      phone: form.phone.trim()   ||"Non spécifié",
     };
 
     console.log("Données envoyées au backend :", dataToSend);
@@ -128,7 +132,8 @@ export default function Signup() {
             />
           </div>
 
-          <div className="form-group">
+
+<div className="form-group">
             <label>Rôle</label>
             <select name="role" value={form.role} onChange={handleChange} required>
               {roles.map((role) => (

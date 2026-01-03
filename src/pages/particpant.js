@@ -1,13 +1,10 @@
-// src/pages/Participant.js
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./participant.css";
 
-// رابط الـ backend مباشرة (أو استورد من config.js لو عندك)
 const API_BASE_URL = "https://v-nement-scientifique.onrender.com/api";
 
-// إضافة interceptor مرة واحدة فقط في أعلى الملف
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -16,80 +13,58 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
-// Icônes بسيطة
 const CalendarIcon = () => <span className="icon">📅</span>;
 const LocationIcon = () => <span className="icon">📍</span>;
 const BellIcon = () => <span className="icon">🔔</span>;
 const MessageIcon = () => <span className="icon">✉️</span>;
+const QuestionIcon = () => <span className="icon">❓</span>;
+const PollIcon = () => <span className="icon">📊</span>;
+const CertificateIcon = () => <span className="icon">🏆</span>;
 const LogoutIcon = () => <span className="icon">🚪</span>;
-const DownloadIcon = () => <span className="icon">⬇️</span>;
-const CheckIcon = () => <span className="icon">✓</span>;
 
 const Participant = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // حماية الصفحة: لو مفيش token → اذهب للـ login فورًا
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login", { replace: true });
+      return;
     }
-  }, [navigate]);
 
-  // جلب بيانات المستخدم + الأحداث + الإشعارات
-  useEffect(() => {
     const fetchData = async () => {
       try {
-        // جلب بيانات الملف الشخصي (الـ interceptor يضيف الـ token تلقائيًا)
+        // Fetch user profile
         const profileRes = await axios.get(`${API_BASE_URL}/auth/profile`);
-        setUser(profileRes.data.user || profileRes.data); // حسب شكل الـ response
+        setUser(profileRes.data.user || profileRes.data);
 
-        // بيانات ثابتة مؤقتًا (احذفها لما تضيف الـ API الحقيقية)
-        setEvents([
-          {
-            id: 1,
-            title: "Congrès National de Santé Numérique 2026",
-            date: "15-17 Janvier 2026",
-            location: "Constantine, Algérie",
-            status: "futur",
-            attestationAvailable: false,
-          },
-          {
-            id: 2,
-            title: "Workshop Intelligence Artificielle et Imagerie Médicale",
-            date: "10-12 Décembre 2025",
-            location: "En ligne",
-            status: "termine",
-            attestationAvailable: true,
-          },
-          {
-            id: 3,
-            title: "Journée Scientifique sur l'IA en Médecine",
-            date: "20 Janvier 2026",
-            location: "Alger",
-            status: "futur",
-            attestationAvailable: false,
-          },
-        ]);
+        // Fetch registered events
+        try {
+          const regRes = await axios.get(`${API_BASE_URL}/registrations/my-registrations`);
+          let registeredEvents = [];
 
-        setNotifications([
-          "Votre attestation pour le workshop du 10-12 Déc. est disponible",
-          "Le programme du congrès de janvier 2026 a été mis à jour",
-          "Bienvenue dans votre espace participant !",
-        ]);
+          if (Array.isArray(regRes.data)) {
+            registeredEvents = regRes.data;
+          } else if (regRes.data.registrations) {
+            registeredEvents = regRes.data.registrations.map(r => r.event || r);
+          } else if (regRes.data.data?.registrations) {
+            registeredEvents = regRes.data.data.registrations.map(r => r.event || r);
+          }
+
+          setEvents(registeredEvents);
+        } catch (err) {
+          console.warn("No registered events");
+          setEvents([]);
+        }
 
       } catch (err) {
-        console.error("خطأ في جلب البيانات:", err);
-        setError("Erreur lors du chargement des données");
-
+        console.error("Error loading data:", err);
         if (err.response?.status === 401 || err.response?.status === 403) {
-          alert("Session expirée ou accès refusé. Veuillez vous reconnecter.");
           localStorage.removeItem("token");
+          localStorage.removeItem("userRole");
           navigate("/login", { replace: true });
         }
       } finally {
@@ -100,137 +75,97 @@ const Participant = () => {
     fetchData();
   }, [navigate]);
 
-  // دالة الخروج
   const handleLogout = () => {
-    if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
-      localStorage.removeItem("token");
-      navigate("/login", { replace: true });
-    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    navigate("/login");
   };
 
-  // اسم المستخدم الكامل
-  const fullName = user
-    ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-    : "Utilisateur";
-  const firstName = fullName.split(" ")[0] || "Cher participant";
+  const fullName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Participant";
+  const firstName = fullName.split(" ")[0] || "Participant";
+
+  // Safe location rendering (handles object or string)
+  const renderLocation = (location) => {
+    if (!location) return "Location not set";
+    if (typeof location === "string") return location;
+    if (typeof location === "object") {
+      const parts = [];
+      if (location.venue) parts.push(location.venue);
+      if (location.address) parts.push(location.address);
+      if (location.city) parts.push(location.city);
+      if (location.country) parts.push(location.country);
+      return parts.filter(Boolean).join(", ") || "Location not set";
+    }
+    return "Location not set";
+  };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl">
-        Chargement en cours...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-600 text-xl">
-        {error}
-      </div>
-    );
+    return <div className="loading">Loading your dashboard...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-700">SciHealth Events</h1>
-          <nav className="flex items-center gap-6">
-            <Link to="/evenements" className="hover:text-blue-600">
-              Mes événements
-            </Link>
-            <a href="#" className="relative hover:text-blue-600">
-              <BellIcon />
-              Notifications
-              {notifications.length > 0 && (
-                <span className="notification-badge">{notifications.length}</span>
-              )}
-            </a>
-            <Link to="/messages" className="hover:text-blue-600">
-              <MessageIcon /> Messages
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="font-medium">{fullName}</p>
-                <p className="text-sm text-gray-600">{user?.institution || "Institution non spécifiée"}</p>
-              </div>
-              <div className="avatar bg-blue-600 text-white">
-                {fullName.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <button onClick={handleLogout} className="logout-btn hover:text-red-600" title="Déconnexion">
-              <LogoutIcon />
+    <div className="participant-dashboard">
+      <header className="header">
+        <div className="container">
+          <h1>SciHealth Events</h1>
+          <nav>
+            <Link to="/evenements">Browse Events</Link>
+            <button onClick={handleLogout} className="logout-btn">
+              <LogoutIcon /> Logout
             </button>
+            <div className="user-info">
+              <p>{fullName}</p>
+              <p>{user?.institution || "No institution specified"}</p>
+            </div>
           </nav>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="welcome mb-8">
-          <h2 className="text-3xl font-bold mb-2">Bonjour, {firstName} 👋</h2>
-          <p className="text-lg text-gray-700">Voici un aperçu de vos événements scientifiques</p>
-        </div>
+      <main className="container">
+        <h2>Welcome back, {firstName}!</h2>
 
-        {/* Événement en cours */}
-        <div className="current-event placeholder bg-blue-50 p-8 rounded-lg text-center mb-10">
-          <h3 className="text-2xl font-semibold mb-4">Aucun événement en cours aujourd'hui</h3>
-          <p className="text-gray-700 mb-6">Accédez à un événement live dès qu'il commence.</p>
-          <Link to="/live-event" className="btn-live inline-block">
-            Accéder à l'événement live (exemple)
-          </Link>
-        </div>
-
-        {/* Mes événements */}
-        <section className="mb-12">
-          <h3 className="text-2xl font-bold mb-6">Mes événements</h3>
-          <div className="events-grid">
-            {events.map((event) => (
-              <div key={event.id} className="event-card bg-white shadow-md rounded-lg p-6">
-                <div className="header-card flex justify-between items-start mb-4">
-                  <span className={`status-badge status-${event.status}`}>
-                    {event.status === "futur" ? "À venir" : "Terminé"}
-                  </span>
-                  {event.attestationAvailable && <CheckIcon />}
-                </div>
-
-                <h4 className="text-xl font-semibold mb-4">{event.title}</h4>
-                <div className="details text-gray-600 mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CalendarIcon /> {event.date}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <LocationIcon /> {event.location}
-                  </div>
-                </div>
-
-                <div className="actions flex gap-3">
-                  <Link to={`/event/${event.id}`} className="btn-live flex-1 text-center">
-                    Accéder à l'événement
-                  </Link>
-                  {event.attestationAvailable && (
-                    <button className="btn-download flex items-center justify-center gap-2">
-                      <DownloadIcon /> Attestation
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Notifications */}
         <section>
-          <h3 className="text-2xl font-bold mb-6">Notifications récentes</h3>
-          <div className="notifications space-y-4">
-            {notifications.map((notif, index) => (
-              <div key={index} className="notif-item bg-white shadow rounded-lg p-4 flex items-start gap-4">
-                <BellIcon />
-                <p className="text-gray-800">{notif}</p>
-              </div>
-            ))}
-          </div>
+          <h3>My Registered Events</h3>
+          {events.length === 0 ? (
+            <div className="empty-state">
+              <p>You are not registered for any event yet.</p>
+              <Link to="/evenements" className="btn-primary">
+                Browse Events and Register
+              </Link>
+            </div>
+          ) : (
+            <div className="events-grid">
+              {events.map((event) => (
+                <div key={event._id} className="event-card">
+                  <h4>{event.title || "Untitled Event"}</h4>
+                  <p>
+                    <CalendarIcon />{" "}
+                    {event.date ? new Date(event.date).toLocaleDateString() : "Date not set"}
+                  </p>
+                  <p>
+                    <LocationIcon /> {renderLocation(event.location)}
+                  </p>
+
+                  <div className="actions">
+                    <Link to={`/event/${event._id}`} className="btn">
+                      Attend Sessions
+                    </Link>
+                    <Link to={`/event/${event._id}/qa`} className="btn">
+                      <QuestionIcon /> Ask Questions
+                    </Link>
+                    <Link to={`/event/${event._id}/polls`} className="btn">
+                      <PollIcon /> Answer Polls
+                    </Link>
+                    {event.certificateGenerated && (
+                      <button className="btn">
+                        <CertificateIcon /> Download Certificate
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>

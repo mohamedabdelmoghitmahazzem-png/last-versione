@@ -1,349 +1,284 @@
-/* ====================================
-   Participant Dashboard - DAW2 2025/2026
-   Université Constantine 2 - Abdelhamid Mehri
-   Thème Santé Numérique
-   ==================================== */
+/* participant.css - Modern & Professional Styles for Participant Dashboard */
 
-.min-h-screen {
+.participant-dashboard {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #f8fafc, #e6f0fa);
+  background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2d3748;
+  color: #333;
 }
 
-/* Header fixe */
-header {
-  background-color: #ffffff;
-  border-bottom: 4px solid #006a4e; /* Vert institutionnel algérien */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* Header */
+.header {
+  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 100;
 }
 
-header .container {
-  max-width: 1200px;
+.header .container {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 0 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 90px;
 }
 
-header h1 {
-  font-size: 1.8rem;
+.header h1 {
+  font-size: 2rem;
   font-weight: 700;
-  color: #004d40;
-  margin: 0;
+  color: #2c3e50;
 }
 
-header nav {
+.header nav {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
-  font-size: 1rem;
+  gap: 40px;
+  font-size: 1.1rem;
 }
 
-header nav a,
-header nav Link {
-  color: #004d40;
+.header nav a {
+  color: #34495e;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: color 0.3s ease;
 }
 
-header nav a:hover {
-  color: #009688;
-}
-
-.notification-badge-parent {
-  position: relative;
-}
-
-.notification-badge {
-  position: absolute;
-  top: -8px;
-  right: -12px;
-  background-color: #d32f2f;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.header nav a:hover {
+  color: #3498db;
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.user-info .text p {
-  margin: 0;
   text-align: right;
 }
 
-.user-info .text p:first-child {
+.user-info p:first-child {
   font-weight: 600;
-  color: #003d33;
+  color: #2c3e50;
 }
 
-.user-info .text p:last-child {
-  font-size: 0.9rem;
-  color: #00695c;
+.user-info p:last-child {
+  font-size: 0.95rem;
+  color: #7f8c8d;
 }
 
 .avatar {
-  width: 48px;
-  height: 48px;
-  background-color: #006a4e;
-  color: white;
-  font-weight: bold;
-  font-size: 1.4rem;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #e0f2f1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  margin-left: 15px;
 }
 
 .logout-btn {
   background: none;
   border: none;
+  font-size: 1.8rem;
   cursor: pointer;
-  color: #d32f2f;
-  font-size: 1.4rem;
-  padding: 8px;
-  transition: transform 0.2s;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  transform: scale(1.2);
+  background: #fdf2f2;
+  color: #e74c3c;
 }
 
-/* Icônes */
-.icon {
-  font-size: 1.2rem;
-  margin-right: 6px;
-}
-
-/* Contenu principal */
+/* Main Content */
 main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 60px 40px;
 }
 
-.welcome {
+main h2 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2c3e50;
   text-align: center;
-  margin: 2rem 0 3rem;
+  margin-bottom: 20px;
 }
 
-.welcome h2 {
-  font-size: 2.4rem;
-  color: #003d33;
-  margin-bottom: 0.5rem;
+main > p {
+  text-align: center;
+  font-size: 1.3rem;
+  color: #555;
+  margin-bottom: 60px;
 }
 
-.welcome p {
-  font-size: 1.2rem;
-  color: #455a64;
-}
-
-/* Placeholder événement en cours */
-.current-event.placeholder {
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
   background: white;
-  border-radius: 16px;
-  padding: 2.5rem;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 3rem;
-  border-left: 6px solid #006a4e;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-.current-event.placeholder h3 {
-  color: #004d40;
-  font-size: 1.6rem;
-  margin-bottom: 1rem;
+.empty-state p {
+  font-size: 1.4rem;
+  color: #666;
+  margin-bottom: 30px;
 }
 
-.current-event.placeholder p {
-  color: #546e7a;
-  margin-bottom: 2rem;
-}
-
-/* Bouton live */
-.btn-live {
+.btn-primary {
   display: inline-block;
-  background-color: #006a4e;
+  background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
-  padding: 12px 28px;
-  border-radius: 30px;
-  font-weight: 600;
+  padding: 16px 40px;
+  border-radius: 50px;
   text-decoration: none;
-  font-size: 1.1rem;
-  transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0, 106, 78, 0.3);
+  font-weight: 600;
+  font-size: 1.2rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
 }
 
-.btn-live:hover {
-  background-color: #004d40;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 106, 78, 0.4);
+.btn-primary:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4);
 }
 
-/* Section événements */
-section h3 {
-  font-size: 1.8rem;
-  color: #003366;
-  margin: 2.5rem 0 1.5rem;
-  padding-bottom: 10px;
-  border-bottom: 3px solid #006a4e;
-}
-
-/* Grille événements */
+/* Events Grid */
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 35px;
 }
 
-/* Carte événement */
 .event-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.4s ease;
-  border: 1px solid #e0f2f1;
 }
 
 .event-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(0, 106, 78, 0.15);
-}
-
-.header-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 1.5rem 0;
-}
-
-.status-badge {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: bold;
-}
-
-.status-futur {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-
-.status-termine {
-  background-color: #e8f5e8;
-  color: #2e7d32;
+  transform: translateY(-12px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
 }
 
 .event-card h4 {
-  padding: 0 1.5rem;
-  margin: 1rem 0;
-  font-size: 1.3rem;
-  color: #003366;
+  font-size: 1.7rem;
+  color: #2c3e50;
+  padding: 25px 25px 15px;
+  margin: 0;
 }
 
-.details {
-  padding: 0 1.5rem;
-  margin-bottom: 1.5rem;
-  color: #455a64;
-  font-size: 1rem;
+.event-card .details {
+  padding: 0 25px;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 25px;
 }
 
-.details div {
-  margin: 0.6rem 0;
-  display: flex;
-  align-items: center;
+.event-card .actions {
+  padding: 0 25px 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
 }
 
-.actions {
-  padding: 1.5rem;
-  background-color: #f1f8f7;
-  display: flex;
-  gap: 1rem;
-  flex-direction: column;
-}
-
-.btn-download {
-  background-color: #388e3c;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
+.btn {
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
   font-weight: 600;
-  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.3s;
 }
 
-.btn-download:hover {
-  background-color: #2e7d32;
+.btn-live {
+  background: linear-gradient(135deg, #3498db, #2980b9);
 }
 
-/* Notifications */
-.notifications {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+.btn-live:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
 }
 
-.notif-item {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid #e0f2f1;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  transition: background-color 0.2s;
+.btn-qa {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
 }
 
-.notif-item:hover {
-  background-color: #f0fdfa;
+.btn-qa:hover {
+  background: linear-gradient(135deg, #8e44ad, #6f2da8);
 }
 
-.notif-item:last-child {
-  border-bottom: none;
+.btn-poll {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
 }
 
-.notif-item p {
-  margin: 0;
-  color: #37474f;
+.btn-poll:hover {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.btn-certificate {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.btn-certificate:hover {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  margin: 20px 25px 0;
+}
+
+.status-upcoming {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  font-size: 1.8rem;
+  padding: 120px 20px;
+  color: #555;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .events-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  header .container {
+  .header .container {
     flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+    gap: 20px;
+    padding: 20px;
   }
 
-  header nav {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
-  }
-
-  .welcome h2 {
-    font-size: 2rem;
+  .header nav {
+    gap: 20px;
+    font-size: 1rem;
   }
 
   .events-grid {
@@ -351,6 +286,14 @@ section h3 {
   }
 
   main {
-    padding: 1rem;
+    padding: 40px 20px;
+  }
+
+  main h2 {
+    font-size: 2.4rem;
+  }
+
+  .event-card .actions {
+    grid-template-columns: 1fr;
   }
 }
