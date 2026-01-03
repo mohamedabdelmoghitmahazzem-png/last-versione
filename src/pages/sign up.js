@@ -1,31 +1,76 @@
 import React, { useState } from "react";
 import "./sign up.css";
 
+// رابط الـ backend
+const API_URL = "https://v-nement-scientifique.onrender.com/api/auth/register";
+
 export default function Signup() {
   const [form, setForm] = useState({
-    nom: "",
-    prenom: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
-    role: "Participant",
+    role: "participant",
+    institution: "",
+    title: "",
+    phone: "",
   });
 
+  // قائمة الـ roles موحدة ومصححة
   const roles = [
-    "Participant",
-    "Auteur",
-    "Organisateur",
-    "Comité Scientifique",
-    "Invité",
-    "Animateur Workshop",
+    { value: "participant", label: "Participant" },
+    { value: "author", label: "Auteur" }, // مصحح من auther
+    { value: "organizer", label: "Organisateur" },
+    { value: "scientific_committee", label: "Membre du Comité Scientifique" },
+    { value: "guest", label: "Invité" },
+    { value: "workshop_animator", label: "Animateur Workshop" },
   ];
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", form);
-    alert("Signup Successful!");
+
+    const dataToSend = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      role: form.role,
+      institution: form.institution.trim() || "Non spécifié",
+      title: form.title.trim() || "Non spécifié",
+      phone: form.phone.trim() || "Non spécifié",
+    };
+
+    console.log("Données envoyées au backend :", dataToSend);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
+
+      const result = await response.json().catch(() => ({ message: "No JSON" }));
+
+      console.log("Statut:", response.status);
+      console.log("Réponse complète backend:", result);
+
+      if (!response.ok) {
+        // تحسين عرض الخطأ (يعرض الـ error حتى لو 500)
+        let errorMsg = result.error || result.message || "Erreur inconnue du serveur";
+        alert("خطأ في التسجيل:\n" + errorMsg);
+        return;
+      }
+
+      alert("Inscription réussie ! Vous serez redirigé vers la page de connexion.");
+      window.location.href = "/login"; // redirect تلقائي
+
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("مشكلة في الاتصال بالسيرفر: " + error.message);
+    }
   };
 
   return (
@@ -35,11 +80,11 @@ export default function Signup() {
 
         <form className="signup-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nom</label>
+            <label>Nom (firstName)</label>
             <input
               type="text"
-              name="nom"
-              value={form.nom}
+              name="firstName"
+              value={form.firstName}
               onChange={handleChange}
               placeholder="Votre nom"
               required
@@ -47,11 +92,11 @@ export default function Signup() {
           </div>
 
           <div className="form-group">
-            <label>Prénom</label>
+            <label>Prénom (lastName)</label>
             <input
               type="text"
-              name="prenom"
-              value={form.prenom}
+              name="lastName"
+              value={form.lastName}
               onChange={handleChange}
               placeholder="Votre prénom"
               required
@@ -65,7 +110,7 @@ export default function Signup() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="Votre email"
+              placeholder="votre.email@example.com"
               required
             />
           </div>
@@ -77,20 +122,54 @@ export default function Signup() {
               name="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="Créer un mot de passe"
+              placeholder="Au moins 8 caractères"
               required
+              minLength="8"
             />
           </div>
 
           <div className="form-group">
             <label>Rôle</label>
-            <select name="role" value={form.role} onChange={handleChange}>
+            <select name="role" value={form.role} onChange={handleChange} required>
               {roles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
+                <option key={role.value} value={role.value}>
+                  {role.label}
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="form-group">
+            <label>Établissement / Institution</label>
+            <input
+              type="text"
+              name="institution"
+              value={form.institution}
+              onChange={handleChange}
+              placeholder="Université, entreprise, etc."
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Titre (Dr., Pr., Mr., etc.)</label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="Titre académique ou professionnel"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Téléphone</label>
+            <input
+              type="tel"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="+213 XX XXX XXX"
+            />
           </div>
 
           <button type="submit" className="signup-btn">
