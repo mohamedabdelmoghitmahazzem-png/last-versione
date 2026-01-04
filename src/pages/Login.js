@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";  // ← أضف useNavigate هنا
 import axios from "axios";
 
 const API_URL = "https://v-nement-scientifique.onrender.com/api/auth";
@@ -10,6 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();  // ← أضف هذا السطر
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,63 +28,56 @@ export default function LoginPage() {
         password,
       });
 
-      console.log("✅ رد السيرفر كامل بعد الـ login:", response.data);
+      console.log("✅ رد السيرفر:", JSON.stringify(response.data, null, 2));
 
-      // السطر الجديد اللي هيحل المشكلة نهائيًا
-      console.log("🔍 هيكل الـ response كامل (JSON مرتب):", JSON.stringify(response.data, null, 2));
-
-      // استخراج الـ token
       const token =
-        response.data.token  ||
-        response.data.accessToken  || 
-        response.data.jwt  ||
-        response.data.access_token || 
-        response.data.authToken  ||
-        response.data.sessionToken  ||
-        response.data.data?.token  ||
-        response.data.user?.token || 
-        response.data.result?.token  ||
+        response.data.token ||
+        response.data.accessToken ||
+        response.data.jwt ||
+        response.data.access_token ||
+        response.data.authToken ||
+        response.data.sessionToken ||
+        response.data.data?.token ||
+        response.data.user?.token ||
+        response.data.result?.token ||
         response.data.profile?.token;
 
       if (!token) {
         throw new Error("لم يتم العثور على رمز الدخول (token) في الرد.");
       }
-// استخراج الـ role بدقة 100% حسب الـ response اللي عندك
-let role = "participant";
 
-if (response.data.role) {
-  role = response.data.role;
-} else if (response.data.user?.role) {
-  role = response.data.user.role;
-} else if (response.data.data?.role) {
-  role = response.data.data.role;
-} else if (response.data.data?.user?.role) {
-  role = response.data.data.user.role;  // ← هذا السطر الجديد اللي هيحل كل المشكلة
-} else if (response.data.result?.role) {
-  role = response.data.result.role;
-} else if (response.data.profile?.role) {
-  role = response.data.profile.role;
-}
+      let role = "participant";
 
-console.log("✅ الـ role المستخرج:", role); // هيظهر "event_organizer" دلوقتي
+      if (response.data.role) role = response.data.role;
+      else if (response.data.user?.role) role = response.data.user.role;
+      else if (response.data.data?.role) role = response.data.data.role;
+      else if (response.data.data?.user?.role) role = response.data.data.user.role;
+      else if (response.data.result?.role) role = response.data.result.role;
+      else if (response.data.profile?.role) role = response.data.profile.role;
+
+      console.log("✅ الـ role المستخرج:", role);
+
+      // حفظ البيانات
       localStorage.setItem("token", token);
-localStorage.setItem("userRole", role);
+      localStorage.setItem("userRole", role);
 
-const roleMap = {
-  super_admin: "/admin",
-  event_organizer: "/organizer",
-  communicant: "/communicant",
-  scientific_committee: "/committee",
-  guest_speaker: "/guest",
-  workshop_animator: "/workshop",
-  participant: "/participant",
-};
+      // خريطة التوجيه
+      const roleMap = {
+        super_admin: "/Superadmin",
+        event_organizer: "/organizer",
+        communicant: "/DashboardContent",
+        scientific_committee: "/cs",
+        guest_speaker: "event/",
+        workshop_animator: "/WorkshopDetailedPage",
+        participant: "/participant",
+      };
 
-const redirectPath = roleMap[role] || "/participant";
+      const redirectPath = roleMap[role] || "/participant";
 
-alert(`Connexion réussie ! Bienvenue, ${role.replace("_", " ")} 👋`);
+      alert(`Connexion réussie ! Bienvenue, ${role.replace("_", " ")} 👋`);
 
-window.location.href = redirectPath;
+      // ← الحل السحري: استخدم navigate بدلاً من window.location
+      navigate(redirectPath, { replace: true });
 
     } catch (err) {
       console.error("❌ خطأ في تسجيل الدخول:", err);
@@ -91,12 +85,14 @@ window.location.href = redirectPath;
       if (err.response?.data?.error) errorMsg = err.response.data.error;
       else if (err.response?.data?.message) errorMsg = err.response.data.message;
       else if (err.message) errorMsg = err.message;
+
       alert("خطأ في تسجيل الدخول:\n" + errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
+  // باقي الـ return كما هو (الفورم والتصميم)
   return (
     <div className="login-container">
       <div className="login-box">
@@ -129,7 +125,7 @@ window.location.href = redirectPath;
             />
           </div>
 
-<div className="options">
+          <div className="options">
             <label>
               <input type="checkbox" disabled={loading} /> Se souvenir de moi
             </label>
